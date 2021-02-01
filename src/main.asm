@@ -1,4 +1,4 @@
-.memorymap
+memorymap
 defaultslot 0
 slotsize $7ff0        ; ROM (not paged)
 slot 0 $0000
@@ -21,6 +21,10 @@ banks 6            ; x6 - 128kb total
 .endro
 
 .sdsctag 1.00, "Hello World!", "Prototype SMS stuff", "Alex W"
+
+.asciitable
+    MAP " " to "z" = $a0
+.enda
 
 ;==============================================================================
 ; SMS Defines
@@ -201,7 +205,7 @@ main:
         ld a, b
         or c
         jp nz, ClearVRAMLoop
-    
+
     ;==========================================================================
     ; Load palettes
     ;==========================================================================
@@ -239,18 +243,6 @@ main:
     call CopyToVDP
 
     ;==========================================================================
-    ; Draw the dialog box
-    ;==========================================================================
-    call DrawDialogBottom
-
-    TILE_XY_TO_ADDR 2, 19
-    SET_VDP_ADDR
-
-    ld hl, MessageText
-    ld bc, MessageTextEnd-MessageText
-    call CopyToVDP
-
-    ;==========================================================================
     ; Enable display
     ;==========================================================================
     ld a, VDP_DISPLAY_ENABLE|VDP_VBLANK_ENABLE
@@ -262,6 +254,17 @@ main:
     out (VDPControl), a
     ld a, $80
     out (VDPControl), a
+
+    ;==========================================================================
+    ; Draw the dialog box
+    ;==========================================================================
+    call DrawDialogBottom
+
+    TILE_XY_TO_ADDR 2, 19
+    SET_VDP_ADDR
+
+    ld hl, MessageText
+    call DrawDialogText
 
     ;==========================================================================
     ; Looooooooooop
@@ -296,7 +299,7 @@ DrawDialogBottom:
         ld hl, $0000
         WRITE_VDP_DATA
         djnz -
-    
+
     ld hl, $00fb|TILE_FLIP_Y
     WRITE_VDP_DATA
     ld hl, $00fc|TILE_FLIP_Y
@@ -311,12 +314,24 @@ DrawDialogBottom:
     ret
 
 DrawDialogText:
-    ret
+-:      ld a, (hl)
+	cp $ff
+	jr z, +
+	ld b, a
+	xor a
+	out (VDPData), a
+	ld a, b
+        out (VDPData), a
+	halt
+	halt
+        inc hl
+        jr -
++:  ret
 
 
 VdpData:
 .db $04, $80    ; 0: Mode 4
-.db $00, $81    ; 1: 
+.db $00, $81    ; 1:
 .db $ff, $82
 .db $ff, $85
 .db $ff, $86
@@ -338,16 +353,18 @@ PlayerSpritePalette:
 .endm
 
 MessageText:
-.dwm toASCII "Hello, world!"
+; .dbm toASCII "Hello, world!\nWhat's this?!"
+.asc "Hello, world! What's this?!"
+.db $ff
 MessageTextEnd:
 
 fontTiles:
 .incbin "assets/font" FSIZE fontTilesSize
 
 DialogTiles:
-.db %11111111, $00, $00, $00
-.db %11111111, $00, $00, $00
-.db %11000000, $00, $00, $00
+.db %00111111, $00, $00, $00
+.db %01111111, $00, $00, $00
+.db %11100000, $00, $00, $00
 .db %11000000, $00, $00, $00
 .db %11000000, $00, $00, $00
 .db %11000000, $00, $00, $00
