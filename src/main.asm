@@ -1,4 +1,4 @@
-memorymap
+.memorymap
 defaultslot 0
 slotsize $7ff0        ; ROM (not paged)
 slot 0 $0000
@@ -85,10 +85,10 @@ banks 6            ; x6 - 128kb total
 ;==============================================================================
 .org $0000
 .section "Startup" force
-        di
-        im 1
+    di
+    im 1
     ld sp, $dff0
-        jr InitMapper
+    jr InitMapper
 .ends
 
 .org $0008
@@ -105,13 +105,13 @@ banks 6            ; x6 - 128kb total
 .org $0018
 .section "RST Vector 2" force
     ; Writes HL to VDP data port
-    ld a,l                          ; (respecting VRAM time costraints)
-        out (VDPData), a                ; 11
-        ld a,h                          ; 4
-        sub $00                         ; 7
-        nop                             ; 4 = 26 (VRAM SAFE)
-        out (VDPData), a
-        ret
+    ld a, l                          ; (respecting VRAM time costraints)
+    out (VDPData), a                ; 11
+    ld a,h                          ; 4
+    sub $00                         ; 7
+    nop                             ; 4 = 26 (VRAM SAFE)
+    out (VDPData), a
+    ret
 .ends
 
 .org $0038
@@ -130,7 +130,7 @@ banks 6            ; x6 - 128kb total
 ;==============================================================================
 .org $0066
 .section "Pause handler" force
-        retn
+    retn
 .ends
 
 ;==============================================================================
@@ -168,14 +168,14 @@ CopyToVDP:
 ; Copies data to the VDP
 ; hl = start address, bc = data length
 ; Affects: a, hl, bc
--:      ld a, (hl)
-        out (VDPData), a
-        inc hl
-        dec bc
-        ld a, b
-        or c
-        jr nz, -
-        ret
+-:  ld a, (hl)
+    out (VDPData), a
+    inc hl
+    dec bc
+    ld a, b
+    or c
+    jr nz, -
+    ret
 
 ;==============================================================================
 ; Main
@@ -270,7 +270,7 @@ main:
     ; Looooooooooop
     ;==========================================================================
     Loop:
-            jp Loop
+        jp Loop
 
 DrawDialogBottom:
     TILE_XY_TO_ADDR 1, 18
@@ -314,18 +314,18 @@ DrawDialogBottom:
     ret
 
 DrawDialogText:
--:      ld a, (hl)
+-:  ld a, (hl)
 	cp $ff
 	jr z, +
 	ld b, a
 	xor a
 	out (VDPData), a
 	ld a, b
-        out (VDPData), a
+    out (VDPData), a
 	halt
 	halt
-        inc hl
-        jr -
+    inc hl
+    jr -
 +:  ret
 
 
