@@ -5,8 +5,6 @@ LDFLAGS = -v -d -s
 
 DIRS=out
 
-SFILES = main.s
-IFILES =
 OFILES = main.o
 
 $(shell mkdir -p $(DIRS))
@@ -16,5 +14,3 @@ all: $(OFILES) Makefile
 
 main.o: src/main.asm
 	$(CC) $(CFLAGS) out/main.o src/main.asm
-
-$(OFILES): $(HFILES)
