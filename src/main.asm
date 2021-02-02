@@ -26,34 +26,6 @@ banks 6            ; x6 - 128kb total
     MAP " " to "z" = $a0
 .enda
 
-;==============================================================================
-; SMS Defines
-;==============================================================================
-.define VDPControl              $bf
-.define VDPStatus               $bf
-.define VDPData                 $be
-.define VRAMWrite               $4000
-.define CRAMWrite               $c000
-
-.define VDP_EXTRA_HEIGHT        %00000010
-.define VDP_SHIFT_SPRITES       %00001000
-.define VDP_LEFT_COL_BLANK      %00100000
-.define VDP_LOCK_HSCROLL        %00000100
-.define VDP_LOCK_VSCROLL        %00001000
-
-.define VDP_ZOOM_SPRITES        %00000001
-.define VDP_TALL_SPRITES        %00000010
-.define VDP_MD_MODE_5           %00000100
-.define VDP_30_ROW              %00001000
-.define VDP_28_ROW              %00010000
-.define VDP_VBLANK_ENABLE       %00100000
-.define VDP_DISPLAY_ENABLE      %01000000
-
-.define TILE_FLIP_X             $0200
-.define TILE_FLIP_Y             $0400
-.define TILE_USE_SPRITE_PAL     $0800
-.define TILE_PRIORITY           $1000
-
 .ramsection "global variables" slot 3
     VDPRegister01       db
     VDPRegister02       db
@@ -62,22 +34,11 @@ banks 6            ; x6 - 128kb total
     DialogCurrentLine   db
 .ends
 
-;==============================================================================
-; Macros
-;==============================================================================
+.incdir "src"
 
-; Set the VDP address to HL
-.macro SET_VDP_ADDR
-    rst $08
-.endm
-
-.macro WRITE_VDP_DATA
-    rst $18
-.endm
-
-.macro TILE_XY_TO_ADDR ARGS TILE_X, TILE_Y
-    ld hl, $4000|($3800+(TILE_Y.w<<6)+(TILE_X.w<<1))
-.endm
+.include "macros.asm"
+.include "vdp.asm"
+.include "dialog.asm"
 
 .bank 0 slot 0
 
@@ -115,10 +76,13 @@ banks 6            ; x6 - 128kb total
     ret
 .ends
 
+;==============================================================================
+; Interrupt service routine
+;==============================================================================
 .org $0038
 .section "Interrupt handler" force
     push af
-        in a, (VDPStatus)
+        in a, (VDPStatus)               ; Satisfy the interrupt
         ld a, $01
         ld (VBlankFlag), a              ; Update flag
     pop af
@@ -164,19 +128,6 @@ InitialMapperValues:
 ;     push hl
 ;     in
 ; .ends
-
-CopyToVDP:
-; Copies data to the VDP
-; hl = start address, bc = data length
-; Affects: a, hl, bc
--:  ld a, (hl)
-    out (VDPData), a
-    inc hl
-    dec bc
-    ld a, b
-    or c
-    jr nz, -
-    ret
 
 ;==============================================================================
 ; Main
@@ -274,96 +225,6 @@ main:
         halt
         jp Loop
 
-DrawDialogBottom:
-    TILE_XY_TO_ADDR 1, 18
-    SET_VDP_ADDR
-    ld hl, $00fb
-    WRITE_VDP_DATA
-    ld hl, $00fc
-    .repeat 29
-        WRITE_VDP_DATA
-    .endr
-    ld hl, $00fb|TILE_FLIP_X
-    WRITE_VDP_DATA
-    ld hl, $0000
-    WRITE_VDP_DATA
-
-    ld b, 4
-    -:
-        ld hl, $00fd
-        WRITE_VDP_DATA
-        ld hl, $00a0
-        .repeat 29
-            WRITE_VDP_DATA
-        .endr
-        ld hl, $00fd|TILE_FLIP_X
-        WRITE_VDP_DATA
-        ld hl, $0000
-        WRITE_VDP_DATA
-        djnz -
-
-    ld hl, $00fb|TILE_FLIP_Y
-    WRITE_VDP_DATA
-    ld hl, $00fc|TILE_FLIP_Y
-    .repeat 29
-        WRITE_VDP_DATA
-    .endr
-    ld hl, $00fb|TILE_FLIP_X|TILE_FLIP_Y
-    WRITE_VDP_DATA
-    ld hl, $0000
-    WRITE_VDP_DATA
-
-    ret
-
-DrawDialogText:
-    push hl
-    pop bc                  ; Move message address to BC
-    ld h, 0
-    ld d, 0
-
-DialogNewLine:
-    inc d
-    push bc
-        TILE_XY_TO_ADDR 2, 18   ; Start at row 18
-        ld bc, 64
-        ld e, d
-    -:  add hl, bc              ; Add d * 64 (d rows)
-        dec e
-        jr nz, -
-        SET_VDP_ADDR            ; Set the VDP address
-    pop bc
-
-    DialogLoop:
-        ld a, (bc)          ; Read next char
-        cp $80              ; $80 marks end of string
-        jr z, DialogLoopEnd ; Finish
-        cp $81              ; $81 marks new line
-        jr nz, +
-        inc bc              ; Move to next char
-        jp DialogNewLine 
-    +:  ld h, 0
-        ld l, a             ; Move char into HL (low)
-        WRITE_VDP_DATA      ; Write HL to VDP Data
-        halt
-        halt
-        inc bc              ; Move to next char
-        jr DialogLoop
-    
-DialogLoopEnd:
-    ret
-
-
-VdpData:
-.db $04, $80    ; 0: Mode 4
-.db $00, $81    ; 1:
-.db $ff, $82
-.db $ff, $85
-.db $ff, $86
-.db $ff, $87
-.db $00, $88
-.db $00, $89
-.db $ff, $8a
-VdpDataEnd:
 
 PaletteData:
 .db $00,$3f
