@@ -59,6 +59,7 @@ banks 6            ; x6 - 128kb total
     VDPRegister02       db
     InputMap            db
     VBlankFlag          db
+    DialogCurrentLine   db
 .ends
 
 ;==============================================================================
@@ -270,6 +271,7 @@ main:
     ; Looooooooooop
     ;==========================================================================
     Loop:
+        halt
         jp Loop
 
 DrawDialogBottom:
@@ -314,19 +316,41 @@ DrawDialogBottom:
     ret
 
 DrawDialogText:
--:  ld a, (hl)
-	cp $ff
-	jr z, +
-	ld b, a
-	xor a
-	out (VDPData), a
-	ld a, b
-    out (VDPData), a
-	halt
-	halt
-    inc hl
-    jr -
-+:  ret
+    push hl
+    pop bc                  ; Move message address to BC
+    ld h, 0
+    ld d, 0
+
+DialogNewLine:
+    inc d
+    push bc
+        TILE_XY_TO_ADDR 2, 18   ; Start at row 18
+        ld bc, 64
+        ld e, d
+    -:  add hl, bc              ; Add d * 64 (d rows)
+        dec e
+        jr nz, -
+        SET_VDP_ADDR            ; Set the VDP address
+    pop bc
+
+    DialogLoop:
+        ld a, (bc)          ; Read next char
+        cp $80              ; $80 marks end of string
+        jr z, DialogLoopEnd ; Finish
+        cp $81              ; $81 marks new line
+        jr nz, +
+        inc bc              ; Move to next char
+        jp DialogNewLine 
+    +:  ld h, 0
+        ld l, a             ; Move char into HL (low)
+        WRITE_VDP_DATA      ; Write HL to VDP Data
+        halt
+        halt
+        inc bc              ; Move to next char
+        jr DialogLoop
+    
+DialogLoopEnd:
+    ret
 
 
 VdpData:
@@ -353,9 +377,14 @@ PlayerSpritePalette:
 .endm
 
 MessageText:
-; .dbm toASCII "Hello, world!\nWhat's this?!"
-.asc "Hello, world! What's this?!"
-.db $ff
+.asc "Hello, world! :)"
+.db $81 ; New line
+.asc "What's this?!"
+.db $81
+.asc "  MORE ROWS NEEDED"
+.db $81
+.asc "and another one. why not."
+.db $80
 MessageTextEnd:
 
 fontTiles:
