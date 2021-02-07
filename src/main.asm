@@ -210,13 +210,13 @@ main:
     ;==========================================================================
     ; Draw the dialog box
     ;==========================================================================
-    call DrawDialogBottom
-
-    TILE_XY_TO_ADDR 2, 19
-    SET_VDP_ADDR
-
+    call DrawDialogTop
     ld hl, MessageText
-    call DrawDialogText
+    call DrawDialogTextTop
+
+    call DrawDialogBottom
+    ld hl, MessageText2
+    call DrawDialogTextBottom
 
     ;==========================================================================
     ; Looooooooooop
@@ -247,6 +247,17 @@ MessageText:
 .asc "and another one. why not."
 .db $80
 MessageTextEnd:
+
+MessageText2:
+.asc "Hello, world! :)"
+.db $81 ; New line
+.asc "Here's some more text"
+.db $81
+.asc "But this text shows"
+.db $81
+.asc "    at the bottom!"
+.db $80
+MessageText2End:
 
 fontTiles:
 .incbin "assets/font" FSIZE fontTilesSize

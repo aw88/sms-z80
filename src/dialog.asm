@@ -1,7 +1,10 @@
 .section "Dialog routines" free
+DrawDialogTop:
+    TILE_XY_TO_ADDR 1, 0
+    jr +
 DrawDialogBottom:
     TILE_XY_TO_ADDR 1, 18
-    SET_VDP_ADDR
++:  SET_VDP_ADDR
     ld hl, $00fb
     WRITE_VDP_DATA
     ld hl, $00fc
@@ -40,8 +43,14 @@ DrawDialogBottom:
 
     ret
 
-DrawDialogText:
-    push hl
+DrawDialogTextTop:
+    ld a, $01
+    ld (DialogCurrentLine), a
+    jr +
+DrawDialogTextBottom:
+    xor a
+    ld (DialogCurrentLine), a
++:  push hl
     pop bc                  ; Move message address to BC
     ld h, 0
     ld d, 0
@@ -49,8 +58,12 @@ DrawDialogText:
 DialogNewLine:
     inc d
     push bc
-        TILE_XY_TO_ADDR 2, 18   ; Start at row 18
-        ld bc, 64
+        ld a, (DialogCurrentLine)
+        TILE_XY_TO_ADDR 2, 18   ; Start at row 18 (if not top)
+        or a
+        jr z, +
+        TILE_XY_TO_ADDR 2, 0   ; Start at row 0 (if top)
+    +:  ld bc, 64
         ld e, d
     -:  add hl, bc              ; Add d * 64 (d rows)
         dec e
