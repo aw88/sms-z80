@@ -183,6 +183,7 @@ main:
     ld hl, $5400
     SET_VDP_ADDR
 
+    LOAD_BANK fontTiles
     ld hl, fontTiles
     ld bc, fontTilesSize
     call CopyToVDP
@@ -190,6 +191,7 @@ main:
     ld hl, $5f60
     SET_VDP_ADDR
 
+    LOAD_BANK DialogTiles
     ld hl, DialogTiles
     ld bc, DialogTilesEnd-DialogTiles
     call CopyToVDP
@@ -258,6 +260,10 @@ MessageText2:
 .asc "    at the bottom!"
 .db $80
 MessageText2End:
+
+.bank 7 slot 2
+
+.org $0000
 
 fontTiles:
 .incbin "assets/font" FSIZE fontTilesSize

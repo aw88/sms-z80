@@ -16,3 +16,9 @@
 .macro TILE_XY_TO_ADDR ARGS TILE_X, TILE_Y
     ld hl, $4000|($3800+(TILE_Y.w<<6)+(TILE_X.w<<1))
 .endm
+
+; Load a label's bank into addressable space
+.macro LOAD_BANK ARGS LABEL
+    ld hl, :LABEL
+    ld ($ffff), hl
+.endm
