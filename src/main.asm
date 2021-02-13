@@ -39,6 +39,7 @@ banks 6            ; x6 - 128kb total
 .include "macros.asm"
 .include "vdp.asm"
 .include "dialog.asm"
+.include "sram.asm"
 
 .bank 0 slot 0
 
@@ -134,6 +135,8 @@ InitialMapperValues:
 ;==============================================================================
 main:
     ld sp, $dff0
+
+    call InitialiseSRAM
 
     ;==========================================================================
     ; Setup VDP registers
