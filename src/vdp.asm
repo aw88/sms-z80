@@ -55,3 +55,13 @@ VdpData:
 .db $ff, $8a
 VdpDataEnd:
 .ends
+
+.section "Wait for a VBlank" free
+WaitForVBlank:
+    xor a
+    ld (VBlankFlag), a
+-:  ld a, (VBlankFlag)
+    or a
+    jr z, -
+    ret
+.ends

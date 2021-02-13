@@ -227,7 +227,7 @@ main:
     ; Looooooooooop
     ;==========================================================================
     Loop:
-        halt
+        call WaitForVBlank
         jp Loop
 
 
