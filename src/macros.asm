@@ -2,6 +2,8 @@
 ; Macros
 ;==============================================================================
 
+.define BankMappedToSlot2 $ffff
+
 ; Set the VDP address to HL
 .macro SET_VDP_ADDR
     rst $08
@@ -19,6 +21,6 @@
 
 ; Load a label's bank into addressable space
 .macro LOAD_BANK ARGS LABEL
-    ld hl, :LABEL
-    ld ($ffff), hl
+    ld a, :LABEL
+    ld (BankMappedToSlot2), a
 .endm
