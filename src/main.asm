@@ -233,11 +233,18 @@ main:
     call DrawDialogTextTop
 
     call DialogYesNo
-    call WaitForButton
+    or a
 
+    jr nz, +
     call DrawDialogBottom
-    ld hl, MessageText2
+    ld hl, MessageTextNo
     call DrawDialogTextBottom
+    jr ++
+
++:  call DrawDialogBottom
+    ld hl, MessageTextYes
+    call DrawDialogTextBottom
+++:
 
     ;==========================================================================
     ; Looooooooooop
@@ -269,16 +276,15 @@ MessageText:
 .db $80
 MessageTextEnd:
 
-MessageText2:
-.asc "Hello, world! :)"
-.db $81 ; New line
-.asc "Here's some more text"
-.db $81
-.asc "But this text shows"
-.db $81
-.asc "    at the bottom!"
+MessageTextYes:
+.asc "You chose YES"
 .db $80
-MessageText2End:
+MessageTextYesEnd:
+
+MessageTextNo:
+.asc "You chose NO!"
+.db $80
+MessageTextNoEnd:
 
 .bank 7 slot 2
 
