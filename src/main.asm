@@ -232,6 +232,7 @@ main:
     ld hl, MessageText
     call DrawDialogTextTop
 
+    call DialogYesNo
     call WaitForButton
 
     call DrawDialogBottom

@@ -89,4 +89,74 @@ DialogNewLine:
 
 DialogLoopEnd:
     ret
+
+DialogYesNo:
+    TILE_XY_TO_ADDR 25, 6
+    SET_VDP_ADDR
+    ld hl, $00fb
+    WRITE_VDP_DATA
+    ld hl, $00fc
+    .repeat 5
+        WRITE_VDP_DATA
+    .endr
+    ld hl, $00fb|TILE_FLIP_X
+    WRITE_VDP_DATA
+    ld hl, $0000
+    WRITE_VDP_DATA
+
+
+    TILE_XY_TO_ADDR 25, 7
+    SET_VDP_ADDR
+    ld hl, $00fd
+    WRITE_VDP_DATA
+    ld hl, $00a0
+    WRITE_VDP_DATA
+    ld hl, 'Y'|$0080
+    WRITE_VDP_DATA
+    ld hl, 'e'|$0080
+    WRITE_VDP_DATA
+    ld hl, 's'|$0080
+    WRITE_VDP_DATA
+    ld hl, $00a0
+    WRITE_VDP_DATA
+    ld hl, $00fd|TILE_FLIP_X
+    WRITE_VDP_DATA
+
+    TILE_XY_TO_ADDR 25, 8
+    SET_VDP_ADDR
+    ld hl, $00fd
+    WRITE_VDP_DATA
+    ld hl, $00a0
+    WRITE_VDP_DATA
+    ld hl, 'N'|$0080
+    WRITE_VDP_DATA
+    ld hl, 'o'|$0080
+    WRITE_VDP_DATA
+    ld hl, $00a0
+    WRITE_VDP_DATA
+    ld hl, $00a0
+    WRITE_VDP_DATA
+    ld hl, $00fd|TILE_FLIP_X
+    WRITE_VDP_DATA
+
+    TILE_XY_TO_ADDR 25, 9
+    SET_VDP_ADDR
+    ld hl, $00fb|TILE_FLIP_Y
+    WRITE_VDP_DATA
+    ld hl, $00fc|TILE_FLIP_Y
+    .repeat 5
+        WRITE_VDP_DATA
+    .endr
+    ld hl, $00fb|TILE_FLIP_X|TILE_FLIP_Y
+    WRITE_VDP_DATA
+    ld hl, $0000
+    WRITE_VDP_DATA
+
+    TILE_XY_TO_ADDR 26, 7
+    SET_VDP_ADDR
+    ld hl, '>'|$0080
+    WRITE_VDP_DATA
+
+    ret
+
 .ends
