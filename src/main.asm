@@ -38,6 +38,7 @@ banks 6            ; x6 - 128kb total
 
 .include "macros.asm"
 .include "vdp.asm"
+.include "input.asm"
 .include "dialog.asm"
 .include "sram.asm"
 
@@ -83,9 +84,21 @@ banks 6            ; x6 - 128kb total
 .org $0038
 .section "Interrupt handler" force
     push af
+    push hl
         in a, (VDPStatus)               ; Satisfy the interrupt
         ld a, $01
-        ld (VBlankFlag), a              ; Update flag
+        ld (VBlankFlag), a              ; Update VBlank flag
+        ld hl, (ButtonStatus)
+        ld (PreviousButtonStatus), hl   ; Store previously pressed buttons
+        in a, (IOPortL)
+        cpl
+        ld hl, ButtonStatus
+        ld (hl), a                      ; Store LOW byte of input
+        in a, (IOPortH)
+        cpl
+        inc hl
+        ld (hl), a                      ; Store HIGH byte of input
+    pop hl
     pop af
     ei
     reti
@@ -218,6 +231,8 @@ main:
     call DrawDialogTop
     ld hl, MessageText
     call DrawDialogTextTop
+
+    call WaitForButton
 
     call DrawDialogBottom
     ld hl, MessageText2
