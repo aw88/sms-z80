@@ -38,6 +38,7 @@ banks 6            ; x6 - 128kb total
 
 .include "macros.asm"
 .include "vdp.asm"
+.include "sprite.asm"
 .include "input.asm"
 .include "dialog.asm"
 .include "sram.asm"
@@ -180,8 +181,9 @@ main:
 
     ld hl, $0010 | CRAMWrite
     SET_VDP_ADDR
-    ld hl, PlayerSpritePalette
-    ld b, PlayerSpritePaletteSize
+
+    ld hl, SpritePaletteData
+    ld b, SpritePaletteDataEnd-SpritePaletteData
     ld c, VDPData
     otir
 
@@ -197,12 +199,22 @@ main:
     ld bc, fontTilesSize
     call CopyToVDP
 
+    ; Set VRAM write to 0x1f60 ($1f60 OR $4000)
     ld hl, $5f60
     SET_VDP_ADDR
 
     LOAD_BANK DialogTiles
     ld hl, DialogTiles
     ld bc, DialogTilesEnd-DialogTiles
+    call CopyToVDP
+
+    ; Load sprite tiles
+    ; Set VRAM write to 0x2000 ($2000 OR $4000)
+    ld hl, $6020
+    SET_VDP_ADDR
+
+    ld hl, SpriteTiles
+    ld bc, SpriteTilesEnd-SpriteTiles
     call CopyToVDP
 
     ;==========================================================================
@@ -217,6 +229,32 @@ main:
     out (VDPControl), a
     ld a, $80
     out (VDPControl), a
+
+    ;==========================================================================
+    ; Spritessss
+    ;==========================================================================
+    call SpriteInit
+    ld d, 1
+    ld e, 64
+    ld a, 80
+    call SpriteAdd
+
+    ld d, 2
+    ld e, 72
+    ld a, 80
+    call SpriteAdd
+
+    ld d, 3
+    ld e, 64
+    ld a, 88
+    call SpriteAdd
+
+    ld d, 4
+    ld e, 72
+    ld a, 88
+    call SpriteAdd
+
+    call SpriteCopyToSAT
 
     ;==========================================================================
     ; Draw the dialog box
@@ -248,11 +286,15 @@ main:
 
 
 PaletteData:
-.db $00,$3f
+.db $01,$3f
 PaletteDataEnd:
 
 PlayerSpritePalette:
 .incbin "assets/sprites_pal" FSIZE PlayerSpritePaletteSize
+
+SpritePaletteData:
+.db $3f,$30,$03,$0A
+SpritePaletteDataEnd:
 
 .macro toASCII
 .redefine _out \1+128
@@ -314,3 +356,41 @@ DialogTiles:
 .db %11000000, $00, $00, $00
 .db %11000000, $00, $00, $00
 DialogTilesEnd:
+
+SpriteTiles:
+.db %00111100, $00, $00, $00
+.db %01111111, $00, $00, $00
+.db %11100011, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %01100000, $00, $00, $00
+.db %01100000, $00, $00, $00
+
+.db %00111100, $00, $00, $00
+.db %11111110, $00, $00, $00
+.db %11000111, $00, $00, $00
+.db %00000011, $00, $00, $00
+.db %00000011, $00, $00, $00
+.db %00000011, $00, $00, $00
+.db %00000110, $00, $00, $00
+.db %00000110, $00, $00, $00
+
+.db %01100000, $00, $00, $00
+.db %01100000, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %11000000, $00, $00, $00
+.db %11100011, $00, $00, $00
+.db %01111111, $00, $00, $00
+.db %00111100, $00, $00, $00
+
+.db %00000011, $00, $00, $00
+.db %00000011, $00, $00, $00
+.db %00000110, $00, $00, $00
+.db %00000110, $00, $00, $00
+.db %00000011, $00, $00, $00
+.db %11000111, $00, $00, $00
+.db %11111110, $00, $00, $00
+.db %00111100, $00, $00, $00
+SpriteTilesEnd:
