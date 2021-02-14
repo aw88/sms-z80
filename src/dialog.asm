@@ -180,16 +180,21 @@ DialogYesNo:
     ++: WRITE_VDP_DATA
 
         call WaitForButton                      ; Wait for some input
-        ld c, a
-        and PORT_A_UP|PORT_A_DOWN               ; If up or down is pressed, flip selection
+
+        push bc
+            ld bc, PORT_A_UP|PORT_A_DOWN
+            call IsButtonPressed                ; If up or down is pressed, flip selection
+        pop bc
         jr z, +
         ld a, b
         xor $01                                 ; Flip between $00 and $01
         ld b, a
         jr YesNoLoop
 
-    +:  ld a, c
-        and PORT_A_1                            ; Is button 1 pressed
+    +:  push bc
+            ld bc, PORT_A_1
+            call IsButtonPressed                ; If 1 is pressed, return selection
+        pop bc
         jr z, YesNoLoop
         ld a, b                                 ; Load selected value into a and return
         ret

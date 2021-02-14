@@ -22,4 +22,16 @@ WaitForButton:
     or a
     jr z, -
     ret
+
+; Checks if a button was pressed this frame
+; Input: BC - input mask to check against
+; TODO: Use both bytes of input to check against 2nd pad?
+IsButtonPressed:
+    ; ButtonStatus & ^PreviousButtonStatus
+    ld a, (PreviousButtonStatus)
+    cpl
+    ld hl, ButtonStatus
+    and (hl)
+    and c
+    ret
 .ends
