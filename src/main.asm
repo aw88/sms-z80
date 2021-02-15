@@ -26,12 +26,18 @@ banks 6            ; x6 - 128kb total
     MAP " " to "z" = $a0
 .enda
 
+.struct PlayerStruct
+    PositionX db
+    PositionY db
+.endst
+
 .ramsection "global variables" slot 3
     VDPRegister01       db
     VDPRegister02       db
     InputMap            db
     VBlankFlag          db
     DialogCurrentLine   db
+    Player              INSTANCEOF PlayerStruct
 .ends
 
 .incdir "src"
@@ -231,32 +237,6 @@ main:
     out (VDPControl), a
 
     ;==========================================================================
-    ; Spritessss
-    ;==========================================================================
-    call SpriteInit
-    ld d, 1
-    ld e, 64
-    ld a, 80
-    call SpriteAdd
-
-    ld d, 2
-    ld e, 72
-    ld a, 80
-    call SpriteAdd
-
-    ld d, 3
-    ld e, 64
-    ld a, 88
-    call SpriteAdd
-
-    ld d, 4
-    ld e, 72
-    ld a, 88
-    call SpriteAdd
-
-    call SpriteCopyToSAT
-
-    ;==========================================================================
     ; Draw the dialog box
     ;==========================================================================
     call DrawDialogTop
@@ -277,11 +257,55 @@ main:
     call DrawDialogTextBottom
 ++:
 
+    ld hl, Player.PositionX
+    ld (hl), 100
+    ld hl, Player.PositionY
+    ld (hl), 83
+
     ;==========================================================================
     ; Looooooooooop
     ;==========================================================================
     Loop:
+        ld hl, Player.PositionX
+        inc (hl)
+
         call WaitForVBlank
+
+        ;==========================================================================
+        ; Spritessss
+        ;==========================================================================
+        call SpriteInit
+
+        ld d, 1
+        ld a, (Player.PositionX)
+        ld e, a
+        ld a, (Player.PositionY)
+        call SpriteAdd
+
+        ld d, 2
+        ld a, (Player.PositionX)
+        add 8
+        ld e, a
+        ld a, (Player.PositionY)
+        call SpriteAdd
+
+        ld d, 3
+        ld a, (Player.PositionX)
+        ld e, a
+        ld a, (Player.PositionY)
+        add 8
+        call SpriteAdd
+
+        ld d, 4
+        ld a, (Player.PositionX)
+        add 8
+        ld e, a
+        ld a, (Player.PositionY)
+        add 8
+        call SpriteAdd
+
+        call SpriteCopyToSAT
+
         jp Loop
 
 
