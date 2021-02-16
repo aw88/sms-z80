@@ -188,8 +188,8 @@ main:
     ld hl, $0010 | CRAMWrite
     SET_VDP_ADDR
 
-    ld hl, SpritePaletteData
-    ld b, SpritePaletteDataEnd-SpritePaletteData
+    ld hl, SpritePalette
+    ld b, SpritePaletteSize
     ld c, VDPData
     otir
 
@@ -220,7 +220,7 @@ main:
     SET_VDP_ADDR
 
     ld hl, SpriteTiles
-    ld bc, SpriteTilesEnd-SpriteTiles
+    ld bc, SpriteTilesSize
     call CopyToVDP
 
     ;==========================================================================
@@ -310,14 +310,14 @@ AddPlayerSprites:
     ld a, (Player.PositionY)
     call SpriteAdd
 
-    ld d, 2
+    ld d, 3
     ld a, (Player.PositionX)
     add 8
     ld e, a
     ld a, (Player.PositionY)
     call SpriteAdd
 
-    ld d, 3
+    ld d, 2
     ld a, (Player.PositionX)
     ld e, a
     ld a, (Player.PositionY)
@@ -339,12 +339,8 @@ PaletteData:
 .db $01,$3f
 PaletteDataEnd:
 
-PlayerSpritePalette:
-.incbin "assets/sprites_pal" FSIZE PlayerSpritePaletteSize
-
-SpritePaletteData:
-.db $3f,$30,$03,$0A
-SpritePaletteDataEnd:
+SpritePalette:
+.incbin "assets/sprites_pal" FSIZE SpritePaletteSize
 
 .macro toASCII
 .redefine _out \1+128
@@ -408,39 +404,4 @@ DialogTiles:
 DialogTilesEnd:
 
 SpriteTiles:
-.db %00111100, $00, $00, $00
-.db %01111111, $00, $00, $00
-.db %11100011, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %01100000, $00, $00, $00
-.db %01100000, $00, $00, $00
-
-.db %00111100, $00, $00, $00
-.db %11111110, $00, $00, $00
-.db %11000111, $00, $00, $00
-.db %00000011, $00, $00, $00
-.db %00000011, $00, $00, $00
-.db %00000011, $00, $00, $00
-.db %00000110, $00, $00, $00
-.db %00000110, $00, $00, $00
-
-.db %01100000, $00, $00, $00
-.db %01100000, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %11000000, $00, $00, $00
-.db %11100011, $00, $00, $00
-.db %01111111, $00, $00, $00
-.db %00111100, $00, $00, $00
-
-.db %00000011, $00, $00, $00
-.db %00000011, $00, $00, $00
-.db %00000110, $00, $00, $00
-.db %00000110, $00, $00, $00
-.db %00000011, $00, $00, $00
-.db %11000111, $00, $00, $00
-.db %11111110, $00, $00, $00
-.db %00111100, $00, $00, $00
-SpriteTilesEnd:
+.incbin "assets/sprites" FSIZE SpriteTilesSize
