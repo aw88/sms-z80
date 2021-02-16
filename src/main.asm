@@ -266,9 +266,6 @@ main:
     ; Looooooooooop
     ;==========================================================================
     Loop:
-        ld hl, Player.PositionX
-        inc (hl)
-
         call WaitForVBlank
 
         ;==========================================================================
@@ -276,37 +273,66 @@ main:
         ;==========================================================================
         call SpriteInit
 
-        ld d, 1
-        ld a, (Player.PositionX)
-        ld e, a
-        ld a, (Player.PositionY)
-        call SpriteAdd
-
-        ld d, 2
-        ld a, (Player.PositionX)
-        add 8
-        ld e, a
-        ld a, (Player.PositionY)
-        call SpriteAdd
-
-        ld d, 3
-        ld a, (Player.PositionX)
-        ld e, a
-        ld a, (Player.PositionY)
-        add 8
-        call SpriteAdd
-
-        ld d, 4
-        ld a, (Player.PositionX)
-        add 8
-        ld e, a
-        ld a, (Player.PositionY)
-        add 8
-        call SpriteAdd
+        call UpdatePlayerPosition
+        call AddPlayerSprites
 
         call SpriteCopyToSAT
 
         jp Loop
+
+UpdatePlayerPosition:
+    ld a, (ButtonStatus)
+    and PORT_A_RIGHT
+    jr z, +
+    ld hl, Player.PositionX
+    inc (hl)
++:  ld a, (ButtonStatus)
+    and PORT_A_LEFT
+    jr z, +
+    ld hl, Player.PositionX
+    dec (hl)
++:  ld a, (ButtonStatus)
+    and PORT_A_DOWN
+    jr z, +
+    ld hl, Player.PositionY
+    inc (hl)
++:  ld a, (ButtonStatus)
+    and PORT_A_UP
+    jr z, +
+    ld hl, Player.PositionY
+    dec (hl)
++:  ret
+
+AddPlayerSprites:
+    ld d, 1
+    ld a, (Player.PositionX)
+    ld e, a
+    ld a, (Player.PositionY)
+    call SpriteAdd
+
+    ld d, 2
+    ld a, (Player.PositionX)
+    add 8
+    ld e, a
+    ld a, (Player.PositionY)
+    call SpriteAdd
+
+    ld d, 3
+    ld a, (Player.PositionX)
+    ld e, a
+    ld a, (Player.PositionY)
+    add 8
+    call SpriteAdd
+
+    ld d, 4
+    ld a, (Player.PositionX)
+    add 8
+    ld e, a
+    ld a, (Player.PositionY)
+    add 8
+    call SpriteAdd
+
+    ret
 
 
 PaletteData:
