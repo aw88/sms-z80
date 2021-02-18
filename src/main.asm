@@ -180,8 +180,9 @@ main:
     ld hl, $0000 | CRAMWrite
     SET_VDP_ADDR
 
-    ld hl, PaletteData
-    ld b, PaletteDataEnd-PaletteData
+    LOAD_BANK MapTilesPalette
+    ld hl, MapTilesPalette
+    ld b, MapTilesPaletteSize
     ld c, $be
     otir
 
@@ -196,6 +197,13 @@ main:
     ;==========================================================================
     ; Load font tiles
     ;==========================================================================
+    ld hl, $4020
+    SET_VDP_ADDR
+    LOAD_BANK MapTiles
+    ld hl, MapTiles
+    ld bc, MapTilesSize
+    call CopyToVDP
+
     ; Set VRAM write to 0x1400 ($1400 OR $4000)
     ld hl, $5400
     SET_VDP_ADDR
@@ -405,3 +413,9 @@ DialogTilesEnd:
 
 SpriteTiles:
 .incbin "assets/sprites" FSIZE SpriteTilesSize
+
+MapTiles:
+.incbin "assets/tiles" FSIZE MapTilesSize
+
+MapTilesPalette:
+.incbin "assets/tiles_pal" FSIZE MapTilesPaletteSize
