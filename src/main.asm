@@ -27,9 +27,15 @@ banks 6            ; x6 - 128kb total
 .enda
 
 .struct PlayerStruct
-    PositionX db
-    PositionY db
+    PositionX   db
+    PositionY   db
+    Facing      db
 .endst
+
+.define FACING_DOWN     $00
+.define FACING_UP       $01
+.define FACING_RIGHT    $02
+.define FACING_LEFT     $03
 
 .ramsection "global variables" slot 3
     VDPRegister01       db
@@ -292,47 +298,59 @@ UpdatePlayerPosition:
     ld a, (ButtonStatus)
     and PORT_A_RIGHT
     jr z, +
+    ld hl, Player.Facing
+    ld (hl), FACING_RIGHT
     ld hl, Player.PositionX
     inc (hl)
 +:  ld a, (ButtonStatus)
     and PORT_A_LEFT
     jr z, +
+    ld hl, Player.Facing
+    ld (hl), FACING_LEFT
     ld hl, Player.PositionX
     dec (hl)
 +:  ld a, (ButtonStatus)
     and PORT_A_DOWN
     jr z, +
+    ld hl, Player.Facing
+    ld (hl), FACING_DOWN
     ld hl, Player.PositionY
     inc (hl)
 +:  ld a, (ButtonStatus)
     and PORT_A_UP
     jr z, +
+    ld hl, Player.Facing
+    ld (hl), FACING_UP
     ld hl, Player.PositionY
     dec (hl)
 +:  ret
 
 AddPlayerSprites:
-    ld d, 1
+    ld a, (Player.Facing)
+    rlca
+    rlca
+    add 1
+    ld d, a
     ld a, (Player.PositionX)
     ld e, a
     ld a, (Player.PositionY)
     call SpriteAdd
 
-    ld d, 3
-    ld a, (Player.PositionX)
-    add 8
-    ld e, a
-    ld a, (Player.PositionY)
-    call SpriteAdd
-
-    ld d, 2
+    inc d
     ld a, (Player.PositionX)
     ld e, a
     ld a, (Player.PositionY)
     add 8
     call SpriteAdd
 
-    ld d, 4
+    inc d
+    ld a, (Player.PositionX)
+    add 8
+    ld e, a
+    ld a, (Player.PositionY)
+    call SpriteAdd
+
+    inc d
     ld a, (Player.PositionX)
     add 8
     ld e, a
