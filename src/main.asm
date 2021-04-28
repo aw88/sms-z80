@@ -168,7 +168,7 @@ main:
     ;==========================================================================
     ; Clear VRAM
     ;==========================================================================
-    ld hl, $0000 | VRAMWrite
+    ld hl, VRAMWrite | $0000
     SET_VDP_ADDR
 
     ld bc, $4000
@@ -211,7 +211,7 @@ main:
     call CopyToVDP
 
     ; Set VRAM write to 0x1400 ($1400 OR $4000)
-    ld hl, $5400
+    ld hl, VRAMWrite|$1400
     SET_VDP_ADDR
 
     LOAD_BANK fontTiles
@@ -220,7 +220,7 @@ main:
     call CopyToVDP
 
     ; Set VRAM write to 0x1f60 ($1f60 OR $4000)
-    ld hl, $5f60
+    ld hl, VRAMWrite|$1f60
     SET_VDP_ADDR
 
     LOAD_BANK DialogTiles
@@ -229,8 +229,8 @@ main:
     call CopyToVDP
 
     ; Load sprite tiles
-    ; Set VRAM write to 0x2000 ($2000 OR $4000)
-    ld hl, $6020
+    ; Set VRAM write to 0x2020 ($2020 OR $4000)
+    ld hl, VRAMWrite|$2020
     SET_VDP_ADDR
 
     ld hl, SpriteTiles
