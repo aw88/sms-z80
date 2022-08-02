@@ -271,10 +271,19 @@ main:
     call DrawDialogTextBottom
 ++:
 
+    ENABLE_SRAM
+
+    ; Load Player.PositionX from SRAM
     ld hl, Player.PositionX
-    ld (hl), 100
+    ld a, (SRAMStart + $20)
+    ld (hl), a
+
+    ; Load Player.PositionY from SRAM
     ld hl, Player.PositionY
-    ld (hl), 83
+    ld a, (SRAMStart + $21)
+    ld (hl), a
+
+    DISABLE_SRAM
 
     ;==========================================================================
     ; Looooooooooop
@@ -289,6 +298,7 @@ main:
 
         call UpdatePlayerPosition
         call AddPlayerSprites
+        call UpdateSRAMPlayerPosition
 
         call SpriteCopyToSAT
 
@@ -360,6 +370,20 @@ AddPlayerSprites:
 
     ret
 
+UpdateSRAMPlayerPosition:
+    ENABLE_SRAM
+
+    ; Save Player.PositionX to SRAM
+    ld a, (Player.PositionX)
+    ld (SRAMStart + $20), a
+
+    ; Save Player.PositionY to SRAM
+    ld a, (Player.PositionY)
+    ld (SRAMStart + $21), a
+
+    DISABLE_SRAM
+
+    ret
 
 PaletteData:
 .db $01,$3f

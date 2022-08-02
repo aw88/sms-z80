@@ -24,3 +24,13 @@
     ld a, :LABEL
     ld (BankMappedToSlot2), a
 .endm
+
+.macro ENABLE_SRAM
+    ld a, $08
+    ld (SRAMBank), a
+.endm
+
+.macro DISABLE_SRAM
+    ld a, $80
+    ld (SRAMBank), a
+.endm
